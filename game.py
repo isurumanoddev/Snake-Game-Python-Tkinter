@@ -3,7 +3,7 @@ from tkinter import *
 
 GAME_WIDTH = 1000
 GAME_HEIGHT = 700
-SPEED = 400
+SPEED = 150
 SPACE_SIZE = 25
 BODY_PARTS = 4
 SNAKE_COLOR = "yellow"
@@ -25,8 +25,8 @@ class Snake:
 
 class Food:
     def __init__(self):
-        x = random.randint(0, (GAME_WIDTH / SPACE_SIZE) - 1) * SPACE_SIZE
-        y = random.randint(0, (GAME_HEIGHT / SPACE_SIZE) - 1) * SPACE_SIZE
+        x = random.randint(0, int(GAME_WIDTH / SPACE_SIZE) - 1) * SPACE_SIZE
+        y = random.randint(0, int(GAME_HEIGHT / SPACE_SIZE) - 1) * SPACE_SIZE
 
         self.coordinates = [x, y]
         canvas.create_oval(x, y, x + SPACE_SIZE, y + SPACE_SIZE, fill=FOOD_COLOR, tag="food")
@@ -51,11 +51,22 @@ def next_turn(snake, food):
 
     print(snake.squares)
 
-    del snake.coordinates[-1]
-    canvas.delete(snake.squares[-1])
-    del snake.squares[-1]
+    if x == food.coordinates[0] and y == food.coordinates[1]:
+        global score
+        score += 1
+        label.config(text="Score :  {}".format(score))
+        canvas.delete("food")
+        food = Food()
 
-    window.after(SPEED, next_turn, snake, food)  # check paramaeters in the funtion
+    else:
+        del snake.coordinates[-1]
+        canvas.delete(snake.squares[-1])
+        del snake.squares[-1]
+
+    if check_collisions() == True:
+        game_over()
+    else:
+        window.after(SPEED, next_turn, snake, food)  # check parameters in the function
 
 
 def change_direction(new_direction):
@@ -75,7 +86,14 @@ def change_direction(new_direction):
 
 
 def check_collisions():
-    pass
+    x, y = snake.coordinates[0]
+
+    if x < 0 or x >= GAME_WIDTH:
+        print("game over")
+        return True
+    if y < 0 or y >= GAME_WIDTH:
+        print("game over")
+        return True
 
 
 def game_over():
@@ -87,7 +105,7 @@ window = Tk()
 score = 0
 direction = "down"
 
-label = Label(window, text="Score :{}".format(score), font=("consolas", 30))
+label = Label(window, text="Score :{}".format(score), font=("consoles", 30))
 label.pack()
 
 canvas = Canvas(window, height=GAME_HEIGHT, width=GAME_WIDTH, background="black")
@@ -95,8 +113,8 @@ canvas.pack()
 
 window.bind("<Up>", lambda event: change_direction("up"))
 window.bind("<Down>", lambda event: change_direction("down"))
-window.bind("<Right>", lambda event: change_direction("right"))
-window.bind("<Left>", lambda event: change_direction("left"))
+window.bind("<Right>", lambda event: change_direction("left"))
+window.bind("<Left>", lambda event: change_direction("right"))
 
 food = Food()
 snake = Snake()
